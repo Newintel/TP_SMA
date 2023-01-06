@@ -26,15 +26,9 @@ public abstract class Agent {
         name = _name;
     }
 
-    public void accept(Message message) {
-        this.accepted.add(message.service);
-        message.from.accepted.add(message.service);
-    }
+    public abstract void accept(Message message);
 
-    public void refuse(Message message) {
-        this.refused.add(message.service);
-        message.from.refused.add(message.service);
-    }
+    public abstract void refuse(Message message);
 
     public void send(Message message, Agent to) {
         message.to = to;
@@ -61,13 +55,10 @@ public abstract class Agent {
             if (message.counters < MAX_COUNTERS) {
                 message.counters++;
                 this.send(this.generate_offer(message), message.from);
-                // message.from.receiveAndAct();
             } else {
-                System.out.println("Refused");
                 this.refuse(message);
             }
         } else {
-            System.out.println("Accepted");
             this.accept(message);
         }
     }
@@ -78,6 +69,7 @@ public abstract class Agent {
         }
 
         this.acquaintances.add(acquaintance);
+        acquaintance.acquaintances.add(this);
     }
 
     protected abstract Message generate_offer(Message from);

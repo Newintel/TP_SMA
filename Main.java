@@ -26,9 +26,13 @@ public class Main {
         a.addPreference(ticket, new BuyerPreference(100d, new GregorianCalendar(2015, 11, 25).getTime(), 280d));
         b.addPreference(ticket2, new BuyerPreference(100d, new GregorianCalendar(2015, 11, 25).getTime(), 280d));
 
+        a.subscribe(s);
+        b.subscribe(s);
+
         a.start();
         b.start();
         s.start();
+
         s.send(s.generate_offer(ticket, c, new PercentageStep(-0.1)), a);
         s.send(s.generate_offer(ticket2, d, new PercentageStep(-0.1)), b);
     }

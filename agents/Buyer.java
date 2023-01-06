@@ -48,6 +48,22 @@ public class Buyer extends Agent {
         this.preferences.put(s.id, preference);
     }
 
+    public void subscribe(Supplier s) {
+        addAcquaintance(s);
+    }
+
+    @Override
+    public void accept(Message message) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void refuse(Message message) {
+        // TODO Auto-generated method stub
+
+    }
+
     // @Override
     // public void receiveAndAct() {
     // System.out.println("Buyer " + name + " receives and acts, " +

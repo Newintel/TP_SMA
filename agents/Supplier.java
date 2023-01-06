@@ -1,6 +1,8 @@
 package agents;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -10,11 +12,27 @@ import communication.SupplierPreference;
 import service.Service;
 import strategies.Strategy;
 
+enum Status {
+    WAITING, ACCEPTED, REFUSED
+}
+
 public class Supplier extends Agent {
     Map<Integer, Strategy> strategies = new HashMap<>();
+    Map<Integer, List<Status>> status = new HashMap<>();
+    List<Service> services;
 
     public Supplier(String name) {
         super(name);
+    }
+
+    public void broadcast(Service service, SupplierPreference preference, Strategy strategy) {
+        Message message = generate_offer(service, preference, strategy);
+        List<Status> statuses = new ArrayList<>();
+        for (int i = 0; i < acquaintances.size(); i++) {
+            statuses.add(Status.WAITING);
+        }
+        status.put(service.id, statuses);
+        send(message, acquaintances);
     }
 
     protected Message generate_offer(Message from) {
@@ -37,6 +55,7 @@ public class Supplier extends Agent {
     public Message generate_offer(Service service, Constraint preferences, Strategy strategy) {
         this.preferences.put(service.id, preferences);
         this.strategies.put(service.id, strategy);
+        this.services.add(service);
         return new Message(this, service, preferences);
     }
 
@@ -58,6 +77,18 @@ public class Supplier extends Agent {
         }
 
         return false;
+    }
+
+    @Override
+    public void accept(Message message) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void refuse(Message message) {
+        // TODO Auto-generated method stub
+
     }
 
     // @Override
