@@ -1,6 +1,6 @@
 package strategies;
 
-public class PercentageStep implements Strategy {
+public class PercentageStep extends Strategy {
     double delta;
 
     public PercentageStep(double _delta) {
@@ -10,7 +10,7 @@ public class PercentageStep implements Strategy {
         delta = _delta;
     }
 
-    public Double generatePrice(Double limitPrice, Double basePrice, Double objective, int step) {
-        return objective * (1 + Math.pow(delta, step / 2));
+    public Double internalGeneratePrice(Double limitPrice, Double basePrice, Double objective, int step) {
+        return objective * (1 + Math.pow(delta, (step + step % 2) / 2));
     }
 }

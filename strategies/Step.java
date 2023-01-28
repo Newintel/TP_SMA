@@ -1,6 +1,6 @@
 package strategies;
 
-public class Step implements Strategy {
+public class Step extends Strategy {
     double delta;
 
     public Step(double _delta) {
@@ -8,7 +8,7 @@ public class Step implements Strategy {
     }
 
     @Override
-    public Double generatePrice(Double limitPrice, Double basePrice, Double objective, int step) {
+    public Double internalGeneratePrice(Double limitPrice, Double basePrice, Double objective, int step) {
         return objective + delta * step / 2;
     }
 

@@ -1,9 +1,9 @@
 package strategies;
 
-public class Dichotomy implements Strategy {
+public class Dichotomy extends Strategy {
 
     @Override
-    public Double generatePrice(Double limitPrice, Double basePrice, Double objective, int step) {
+    public Double internalGeneratePrice(Double limitPrice, Double basePrice, Double objective, int step) {
         return (objective + basePrice) / 2;
     }
 

@@ -10,6 +10,8 @@ public class Message {
     public Constraint constraint;
     public int counters = 0;
 
+    public Status status = Status.WAITING;
+
     public Message(Agent from, Agent to, Service service, Constraint constraint, int counters) {
         this.from = from;
         this.to = to;
@@ -17,6 +19,7 @@ public class Message {
         this.constraint = constraint;
         this.counters = counters;
     }
+
     public Message(Agent from, Agent to, Service service, Constraint constraint) {
         this.from = from;
         this.to = to;
@@ -34,5 +37,15 @@ public class Message {
         this.from = message.from;
         this.service = message.service;
         this.constraint = message.constraint;
+    }
+
+    public Message accepted() {
+        this.status = Status.ACCEPTED;
+        return this;
+    }
+
+    public Message refused() {
+        this.status = Status.REFUSED;
+        return this;
     }
 }
