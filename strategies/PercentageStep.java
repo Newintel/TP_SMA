@@ -11,6 +11,6 @@ public class PercentageStep extends Strategy {
     }
 
     public Double internalGeneratePrice(Double limitPrice, Double basePrice, Double objective, int step) {
-        return objective * (1 + Math.pow(delta, (step + step % 2) / 2));
+        return objective * (1 + (Math.pow(Math.abs(delta), 2 / (step + step % 2)) * (delta / Math.abs(delta))));
     }
 }

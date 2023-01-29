@@ -24,8 +24,9 @@ public class Supplier extends Agent {
         super(name);
     }
 
-    public void broadcast(Service service, SupplierPreference preference, Strategy strategy) {
+    public void broadcast(Service service, SupplierPreference preference, Strategy strategy, int interest) {
         Message message = generate_offer(service, preference, strategy);
+        message.counters = interest;
         Map<String, Status> statuses = new HashMap<>();
         counters.put(service.id, new HashMap<>());
         for (Agent agent : acquaintances) {
@@ -41,26 +42,6 @@ public class Supplier extends Agent {
         Constraint preference = preferences.get(from.service.id);
         Strategy strategy = strategies.get(from.service.id);
 
-        if (accepting.containsKey(from.service.id)) {
-            Map<String, Integer> messageCounters = counters.get(from.service.id);
-            Message m_accepting = accepting.get(from.service.id);
-
-            if (messageCounters != null && messageCounters.entrySet().stream()
-                    .anyMatch(e -> e.getValue() < m_accepting.counters) == false) {
-                if (m_accepting.constraint.price > from.constraint.price) {
-                    System.out.println("Supplier " + name + " prefers accepting from " + m_accepting.from.name);
-                    Message m = accepting.remove(from.service.id);
-                    definitelyAccept(m);
-                    send(m.accepted(), m.from);
-                    return null;
-                }
-                System.out.println("Supplier " + name + " prefers accepting from " + from.from.name);
-                definitelyAccept(from);
-                send(from.accepted(), from.from);
-                return null;
-            }
-        }
-
         Double newPrice = Math.max(
                 strategy.generatePrice(preference.limitPrice, from.constraint.price, preference.price,
                         from.counters),
@@ -68,7 +49,8 @@ public class Supplier extends Agent {
                         ? accepting.get(from.service.id).constraint.price
                         : 0);
 
-        System.out.println("Supplier " + name + " generates offer: " + newPrice + " for " + from.from.name);
+        System.out.println("Supplier " + name + " generates offer: " + newPrice + " on id=" + from.service.id + " for "
+                + from.from.name);
 
         return new Message(this, from.from, from.service,
                 new SupplierPreference(
@@ -92,7 +74,7 @@ public class Supplier extends Agent {
         Double priceDifference = Math.abs(offer.constraint.price - baseOfferPrice);
         Double percentage = priceDifference / baseOfferPrice;
 
-        if (percentage < 0.05) {
+        if (percentage < 0.05 * (1 << interest.getOrDefault(offer.service.id, 0))) {
             System.out.println("Supplier " + name + " can accept offer from " + offer.from.name + " directly");
             return true;
         }
@@ -155,8 +137,31 @@ public class Supplier extends Agent {
 
     @Override
     public boolean internalReceiveAndAct(Message message) {
+        HashMap<String, Status> statuses = (HashMap<String, Status>) status.getOrDefault(message.service.id,
+                new HashMap<>());
+
+        if (accepting.containsKey(message.service.id)
+                && statuses.values().stream().anyMatch(s -> s == Status.ACCEPTED) == false) {
+            Map<String, Integer> messageCounters = counters.get(message.service.id);
+            Message m_accepting = accepting.get(message.service.id);
+
+            if (messageCounters != null && messageCounters.entrySet().stream()
+                    .anyMatch(e -> e.getValue() < m_accepting.counters) == false) {
+                Message m = accepting.remove(message.service.id);
+                if (m_accepting.constraint.price > message.constraint.price) {
+                    System.out.println("Supplier " + name + " prefers accepting from " + m_accepting.from.name);
+                    definitelyAccept(m);
+                    send(m.accepted(), m.from);
+                    return true;
+                }
+                System.out.println("Supplier " + name + " prefers accepting from " + message.from.name);
+                definitelyAccept(message);
+                send(message.accepted(), message.from);
+                return true;
+            }
+        }
+
         if (status.containsKey(message.service.id)) {
-            HashMap<String, Status> statuses = (HashMap<String, Status>) status.get(message.service.id);
             if (statuses.get(message.from.name) != Status.WAITING) {
                 System.out.println(
                         "Supplier " + name + " ignores message from " + message.from.name + " because of status "
@@ -165,6 +170,11 @@ public class Supplier extends Agent {
             }
         }
         if (message.status != Status.WAITING) {
+            if (message.status == Status.ACCEPTED) {
+                accept(message);
+            } else {
+                refuse(message);
+            }
             return true;
         }
         return false;

@@ -43,7 +43,7 @@ public class Buyer extends Agent {
         Double percentage = signedPriceDifference > 0 ? priceDifference / baseOfferPrice
                 : priceDifference / (preference.limitPrice * 20 * objective);
 
-        if (percentage < 0.05) {
+        if (percentage < 0.05 * (1 << interest.getOrDefault(offer.service.id, 0))) {
             System.out.println("Buyer " + name + " accepts offer from " + offer.from.name + " directly");
             return true;
         }
@@ -56,8 +56,9 @@ public class Buyer extends Agent {
         return false;
     }
 
-    public void addPreference(Service s, BuyerPreference preference) {
+    public void addPreference(Service s, BuyerPreference preference, int interest) {
         this.preferences.put(s.id, preference);
+        this.interest.put(s.id, interest);
     }
 
     public void subscribe(Supplier s) {
@@ -72,23 +73,32 @@ public class Buyer extends Agent {
 
     @Override
     public void accept(Message message) {
+        System.out
+                .println("Buyer " + name + " accepts offer on id=" + message.service.id + " from " + message.from.name);
+        super.accept(message);
     }
 
     @Override
     public void refuse(Message message) {
-        // TODO Auto-generated method stub
-
+        System.out
+                .println("Buyer " + name + " refuses offer on id=" + message.service.id + " from " + message.from.name);
+        super.refuse(message);
     }
 
     @Override
     public boolean internalReceiveAndAct(Message message) {
         if (message.status == Status.ACCEPTED) {
             services.add(message.service);
-            System.out.println("Supplier " + message.from.name + " sold id=" + message.service.id + " to " + name);
+            System.out.println(
+                    "Supplier " + message.from.name + " sold id=" + message.service.id + " to " + name + " for "
+                            + message.constraint.price);
+            this.accept(message);
             return true;
         }
 
         if (message.status == Status.REFUSED) {
+            System.out.println(
+                    "Supplier " + message.from.name + " refused to sell id=" + message.service.id + " to " + name);
             return true;
         }
         return false;

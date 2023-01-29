@@ -8,7 +8,6 @@ import java.util.Random;
 
 import communication.Constraint;
 import communication.Message;
-import communication.Status;
 
 public abstract class Agent {
     static int MAX_COUNTERS = 8;
@@ -18,6 +17,7 @@ public abstract class Agent {
     List<Message> read = new ArrayList<>();
     String name;
     Map<Integer, Map<String, Integer>> counters = new HashMap<>();
+    Map<Integer, Integer> interest = new HashMap<>();
 
     Random r = new Random();
 
@@ -66,11 +66,6 @@ public abstract class Agent {
             return;
         }
 
-        if (message.status == Status.ACCEPTED) {
-            this.accept(message);
-            return;
-        }
-
         if (this.evaluate_offer(message) == false) {
             if (message.counters < MAX_COUNTERS) {
                 message.counters++;
@@ -80,7 +75,6 @@ public abstract class Agent {
                 }
             } else {
                 this.refuse(message);
-                
             }
         } else {
             this.accept(message);

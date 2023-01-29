@@ -28,12 +28,12 @@ public class Main {
         SupplierPreference c = new SupplierPreference(200d, 300d, maxDate);
         SupplierPreference d = new SupplierPreference(200d, 300d, maxDate);
 
-        b1.addPreference(ticket2, new BuyerPreference(100d, new GregorianCalendar(2015, 11, 25).getTime(), 280d));
-        b1.addPreference(ticket, new BuyerPreference(100d, new GregorianCalendar(2015, 11, 25).getTime(), 280d));
-        b2.addPreference(ticket2, new BuyerPreference(200d, new GregorianCalendar(2015, 11, 25).getTime(), 280d));
-        b2.addPreference(ticket, new BuyerPreference(200d, new GregorianCalendar(2015, 11, 25).getTime(), 280d));
-        b3.addPreference(ticket2, new BuyerPreference(230d, new GregorianCalendar(2015, 11, 25).getTime(), 280d));
-        b3.addPreference(ticket, new BuyerPreference(230d, new GregorianCalendar(2015, 11, 25).getTime(), 280d));
+        b1.addPreference(ticket2, new BuyerPreference(100d, new GregorianCalendar(2015, 11, 25).getTime(), 280d), 2);
+        b1.addPreference(ticket, new BuyerPreference(100d, new GregorianCalendar(2015, 11, 25).getTime(), 280d), 1);
+        b2.addPreference(ticket2, new BuyerPreference(200d, new GregorianCalendar(2015, 11, 25).getTime(), 280d), 0);
+        b2.addPreference(ticket, new BuyerPreference(200d, new GregorianCalendar(2015, 11, 25).getTime(), 280d), 3);
+        b3.addPreference(ticket2, new BuyerPreference(230d, new GregorianCalendar(2015, 11, 25).getTime(), 280d), 1);
+        b3.addPreference(ticket, new BuyerPreference(230d, new GregorianCalendar(2015, 11, 25).getTime(), 280d), 4);
 
         List<Buyer> buyers = new ArrayList<>();
         buyers.add(b1);
@@ -54,7 +54,7 @@ public class Main {
             su.start();
         }
 
-        s.broadcast(ticket, c, new PercentageStep(-0.1));
-        s2.broadcast(ticket2, d, new PercentageStep(-0.2));
+        s.broadcast(ticket, c, new PercentageStep(-0.1), 1);
+        s2.broadcast(ticket2, d, new PercentageStep(-0.2), 2);
     }
 }
