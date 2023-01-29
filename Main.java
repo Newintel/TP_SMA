@@ -4,7 +4,6 @@ import service.PlaneTicket;
 import strategies.Dichotomy;
 import strategies.Goal;
 import strategies.PercentageStep;
-import strategies.Step;
 import communication.BuyerPreference;
 import communication.SupplierPreference;
 
@@ -15,8 +14,9 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        Buyer a = new Buyer("b1", new PercentageStep(0.20).withGoal(Goal.LOWER));
-        Buyer b = new Buyer("b2", new Dichotomy().withGoal(Goal.LOWER));
+        Buyer b1 = new Buyer("b1", new PercentageStep(0.20).withGoal(Goal.LOWER));
+        Buyer b2 = new Buyer("b2", new Dichotomy().withGoal(Goal.LOWER));
+        Buyer b3 = new Buyer("b3", new Dichotomy().withGoal(Goal.LOWER));
         Supplier s = new Supplier("s1");
         Supplier s2 = new Supplier("s2");
 
@@ -27,25 +27,32 @@ public class Main {
         Date maxDate = new GregorianCalendar(2016, 2, 15).getTime();
         SupplierPreference c = new SupplierPreference(200d, 300d, maxDate);
         SupplierPreference d = new SupplierPreference(200d, 300d, maxDate);
-        b.addPreference(ticket2, new BuyerPreference(200d, new GregorianCalendar(2015, 11, 25).getTime(), 280d));
-        b.addPreference(ticket, new BuyerPreference(200d, new GregorianCalendar(2015, 11, 25).getTime(), 280d));
-        a.addPreference(ticket2, new BuyerPreference(100d, new GregorianCalendar(2015, 11, 25).getTime(), 280d));
-        a.addPreference(ticket, new BuyerPreference(100d, new GregorianCalendar(2015, 11, 25).getTime(), 280d));
+
+        b1.addPreference(ticket2, new BuyerPreference(100d, new GregorianCalendar(2015, 11, 25).getTime(), 280d));
+        b1.addPreference(ticket, new BuyerPreference(100d, new GregorianCalendar(2015, 11, 25).getTime(), 280d));
+        b2.addPreference(ticket2, new BuyerPreference(200d, new GregorianCalendar(2015, 11, 25).getTime(), 280d));
+        b2.addPreference(ticket, new BuyerPreference(200d, new GregorianCalendar(2015, 11, 25).getTime(), 280d));
+        b3.addPreference(ticket2, new BuyerPreference(230d, new GregorianCalendar(2015, 11, 25).getTime(), 280d));
+        b3.addPreference(ticket, new BuyerPreference(230d, new GregorianCalendar(2015, 11, 25).getTime(), 280d));
 
         List<Buyer> buyers = new ArrayList<>();
-        buyers.add(a);
-        buyers.add(b);
+        buyers.add(b1);
+        buyers.add(b2);
+        buyers.add(b3);
+
+        List<Supplier> suppliers = new ArrayList<>();
+        suppliers.add(s);
+        suppliers.add(s2);
 
         for (Buyer bu : buyers) {
-            bu.subscribe(s);
-            bu.subscribe(s2);
+            bu.subscribe(suppliers);
             bu.start();
         }
 
-        s.subscribe(buyers);
-        s2.subscribe(buyers);
-        s.start();
-        s2.start();
+        for (Supplier su : suppliers) {
+            su.subscribe(buyers);
+            su.start();
+        }
 
         s.broadcast(ticket, c, new PercentageStep(-0.1));
         s2.broadcast(ticket2, d, new PercentageStep(-0.2));

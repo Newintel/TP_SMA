@@ -26,7 +26,7 @@ public class Buyer extends Agent {
         preference.price = Math.min(
                 generated,
                 preference.limitPrice);
-        System.out.println("Buyer " + name + " generates offer: " + preference.price);
+        System.out.println("Buyer " + name + " generates offer: " + preference.price + " for id=" + from.service.id);
         return new Message(this, from.from, from.service, preference, from.counters);
     }
 
@@ -41,7 +41,7 @@ public class Buyer extends Agent {
         Double priceDifference = Math.abs(signedPriceDifference);
 
         Double percentage = signedPriceDifference > 0 ? priceDifference / baseOfferPrice
-                : priceDifference * objective / preference.limitPrice * 20;
+                : priceDifference / (preference.limitPrice * 20 * objective);
 
         if (percentage < 0.05) {
             System.out.println("Buyer " + name + " accepts offer from " + offer.from.name + " directly");
@@ -64,6 +64,12 @@ public class Buyer extends Agent {
         addAcquaintance(s);
     }
 
+    public void subscribe(List<Supplier> suppliers) {
+        for (Supplier s : suppliers) {
+            subscribe(s);
+        }
+    }
+
     @Override
     public void accept(Message message) {
     }
@@ -78,6 +84,7 @@ public class Buyer extends Agent {
     public boolean internalReceiveAndAct(Message message) {
         if (message.status == Status.ACCEPTED) {
             services.add(message.service);
+            System.out.println("Supplier " + message.from.name + " sold id=" + message.service.id + " to " + name);
             return true;
         }
 

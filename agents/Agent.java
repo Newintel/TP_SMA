@@ -25,13 +25,18 @@ public abstract class Agent {
         name = _name;
     }
 
-    public abstract void accept(Message message);
+    public void accept(Message message) {
+        this.send(message.accepted(), message.from);
+    }
 
-    public abstract void refuse(Message message);
+    public void refuse(Message message) {
+        this.send(message.refused(), message.from);
+    }
 
     public void send(Message message, Agent to) {
         message.to = to;
-        message.to.messages.add(message);
+        message.from = this;
+        to.messages.add(message);
     }
 
     public void send(Message message, List<Agent> to) {
@@ -52,6 +57,11 @@ public abstract class Agent {
 
         read.add(message);
 
+        if (counters.containsKey(message.service.id) == false) {
+            counters.put(message.service.id, new HashMap<>());
+        }
+        counters.get(message.service.id).put(message.from.name, message.counters);
+
         if (this.internalReceiveAndAct(message)) {
             return;
         }
@@ -64,14 +74,16 @@ public abstract class Agent {
         if (this.evaluate_offer(message) == false) {
             if (message.counters < MAX_COUNTERS) {
                 message.counters++;
-                this.send(this.generate_offer(message), message.from);
+                Message m = this.generate_offer(message);
+                if (m != null) {
+                    this.send(m, message.from);
+                }
             } else {
                 this.refuse(message);
-                this.send(message.refused(), message.from);
+                
             }
         } else {
             this.accept(message);
-            this.send(message.accepted(), message.from);
         }
     }
 
